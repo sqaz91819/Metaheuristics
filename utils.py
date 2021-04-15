@@ -5,7 +5,7 @@ from math import exp
 from math import sqrt
 from math import e
 
-DOMAIN = {'Ackley' : [-30.0, 30.0], 'Rastrigin' : [-5.12, 5.12], 'Sphere' : [-100.0, 100.0],
+DOMAIN = {'Ackley' : [-32.768, 32.768], 'Rastrigin' : [-5.12, 5.12], 'Sphere' : [-30, 30],
                 'Rosenbrock' : [-10.0, 10.0], 'Michalewitz' : [0.0, math.pi]}
 
 def ackley(dim: int, coordination: list) -> float:
