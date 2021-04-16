@@ -24,8 +24,9 @@ class Particle:
 # 5. repeat step 2.
 class MyAlgo:
 
-    def __init__(self, dim: int=2, discount_factor: float=0.997, reward_factor: float=1.003,
+    def __init__(self, dim: int=2, discount_factor: float=0.996, reward_factor: float=1.003,
             testing: str='Ackley'):
+        self.run = 3
         self.dim = dim
         self.popsize = 100
         self.population = []
@@ -61,6 +62,7 @@ class MyAlgo:
                 self.population[i].coordination[d] += v / 3
 
     def algo(self):
+        current_best = np.zeros(self.iteration, dtype=float)
         center = Particle(self.lower_bound, self.upper_bound, dim=self.dim)
         center.best = ackley(self.dim, center.coordination)
         for k in range(self.iteration):
@@ -72,8 +74,8 @@ class MyAlgo:
                 # pull
                 self.pull(center)
 
-            # x = np.zeros(self.popsize)
-            # y = np.zeros(self.popsize)
+            x = np.zeros(self.popsize)
+            y = np.zeros(self.popsize)
 
             # evaluate
             for i in range(self.popsize):
@@ -81,10 +83,11 @@ class MyAlgo:
                 if self.population[i].best < center.best:
                     center = self.population[i]
                     self.max_mov = self.max_mov * self.reward_factor
-                # x[i] = self.population[i].coordination[2]
-                # y[i] = self.population[i].coordination[3]
+                x[i] = self.population[i].coordination[2]
+                y[i] = self.population[i].coordination[3]
 
             print(center.best)
+            current_best[k] = center.best
             self.max_mov = self.max_mov * self.discount_factor
 
             # fig, ax = plt.subplots()
@@ -92,7 +95,21 @@ class MyAlgo:
             # plt.plot(x, y, 'o')
             # plt.show()
 
-if __name__=='__main__':
-    algo = MyAlgo(dim=30, testing='Sphere')
-    algo.algo()
+        return current_best
 
+    def run_algo(self):
+        recorder = np.zeros((self.run, self.iteration), dtype=float)
+        # print(recorder)
+        # print(recorder.shape)
+        for i in range(self.run):
+            algo = MyAlgo(dim=self.dim, testing=self.testing)
+            recorder[i] = algo.algo()
+
+        print(recorder)
+
+
+
+if __name__=='__main__':
+    algo = MyAlgo(dim=30, testing='Rosenbrock')
+    # algo.algo()
+    algo.run_algo()
