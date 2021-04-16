@@ -105,11 +105,17 @@ class MyAlgo:
             algo = MyAlgo(dim=self.dim, testing=self.testing)
             recorder[i] = algo.algo()
 
-        print(recorder)
+        # print(recorder)
+        x = np.sum(recorder, axis=0)
+        print(x)
+
+        x1 = np.arange(self.iteration)
+        plt.plot(x1, x)
+        plt.show()
 
 
 
 if __name__=='__main__':
-    algo = MyAlgo(dim=30, testing='Rosenbrock')
+    algo = MyAlgo(dim=30, testing='Sphere')
     # algo.algo()
     algo.run_algo()
