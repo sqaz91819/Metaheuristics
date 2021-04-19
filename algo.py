@@ -4,8 +4,16 @@ python ver = '3.8.3'
 import random
 from utils import DOMAIN
 from utils import ackley
+from utils import rosenbrock
+from utils import sphere
+from utils import michalewitz
+from utils import rastrigin
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import threading
+import time
+import multiprocessing as mp
 
 class Particle:
     def __init__(self, lower: float=0.0, upper: float=1.0, dim: int=2):
@@ -24,9 +32,9 @@ class Particle:
 # 5. repeat step 2.
 class MyAlgo:
 
-    def __init__(self, dim: int=2, discount_factor: float=0.996, reward_factor: float=1.003,
+    def __init__(self, dim: int=2, discount_factor: float=0.996, reward_factor: float=1.01,
             testing: str='Ackley'):
-        self.run = 3
+        self.run = 1
         self.dim = dim
         self.popsize = 100
         self.population = []
@@ -64,7 +72,9 @@ class MyAlgo:
     def algo(self):
         current_best = np.zeros(self.iteration, dtype=float)
         center = Particle(self.lower_bound, self.upper_bound, dim=self.dim)
+        # center2 = Particle(self.lower_bound, self.upper_bound, dim=self.dim)
         center.best = ackley(self.dim, center.coordination)
+        # center2.best = ackley(self.dim, center.coordination)
         for k in range(self.iteration):
             # 2. Set some points around the center point [-1,1]
             if k % 5 == 0:
@@ -79,12 +89,13 @@ class MyAlgo:
 
             # evaluate
             for i in range(self.popsize):
-                self.population[i].best = ackley(self.dim, self.population[i].coordination)
-                if self.population[i].best < center.best:
+                # self.population[i].best = ackley(self.dim, self.population[i].coordination)
+                self.population[i].best = globals()[self.testing.lower()](self.dim, self.population[i].coordination)
+                if self.population[i].best <= center.best:
                     center = self.population[i]
                     self.max_mov = self.max_mov * self.reward_factor
-                x[i] = self.population[i].coordination[2]
-                y[i] = self.population[i].coordination[3]
+                x[i] = self.population[i].coordination[0]
+                y[i] = self.population[i].coordination[1]
 
             print(center.best)
             current_best[k] = center.best
@@ -104,18 +115,42 @@ class MyAlgo:
         for i in range(self.run):
             algo = MyAlgo(dim=self.dim, testing=self.testing)
             recorder[i] = algo.algo()
+            print(self.testing, 'run :', i)
 
         # print(recorder)
-        x = np.sum(recorder, axis=0)
-        print(x)
+        # x = np.sum(recorder, axis=0)
+        x = np.mean(recorder, axis=0)
+        # print(x)
 
-        x1 = np.arange(self.iteration)
-        plt.plot(x1, x)
-        plt.show()
+        # x1 = np.arange(self.iteration)
+        # plt.plot(x1, x)
+        # plt.show()
+        pd.DataFrame(x).to_csv("./output/" + self.testing, header=None)
 
 
 
 if __name__=='__main__':
-    algo = MyAlgo(dim=30, testing='Sphere')
+    t = time.time()
+    functions = ['Ackley', 'Rastrigin', 'Sphere', 'Rosenbrock', 'Michalewitz']
+    # functions = ['Michalewitz']
+
+    # threads = []
+    # tasks = [MyAlgo(dim=30, testing=function) for function in functions]
+    # for i in range(len(tasks)):
+    #     threads.append(mp.Process(target=tasks[i].run_algo))
+    #     threads[i].start()
+
+    # for i in range(len(tasks)):
+    #     threads[i].join()
+
+    # for function in functions:
+    #     algo = MyAlgo(dim=30, testing=function)
+    #     algo.run_algo()
     # algo.algo()
+    # algo.run_algo()
+
+    algo = MyAlgo(dim=30, testing='Michalewitz')
     algo.run_algo()
+
+    print(time.time() - t, 'sec')
+    exit()
