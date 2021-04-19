@@ -32,9 +32,9 @@ class Particle:
 # 5. repeat step 2.
 class MyAlgo:
 
-    def __init__(self, dim: int=2, discount_factor: float=0.996, reward_factor: float=1.01,
+    def __init__(self, dim: int=2, discount_factor: float=0.9965, reward_factor: float=1.009,
             testing: str='Ackley'):
-        self.run = 1
+        self.run = 30
         self.dim = dim
         self.popsize = 100
         self.population = []
@@ -73,7 +73,7 @@ class MyAlgo:
         current_best = np.zeros(self.iteration, dtype=float)
         center = Particle(self.lower_bound, self.upper_bound, dim=self.dim)
         # center2 = Particle(self.lower_bound, self.upper_bound, dim=self.dim)
-        center.best = ackley(self.dim, center.coordination)
+        center.best = globals()[self.testing.lower()](self.dim, center.coordination)
         # center2.best = ackley(self.dim, center.coordination)
         for k in range(self.iteration):
             # 2. Set some points around the center point [-1,1]
@@ -94,8 +94,9 @@ class MyAlgo:
                 if self.population[i].best <= center.best:
                     center = self.population[i]
                     self.max_mov = self.max_mov * self.reward_factor
-                x[i] = self.population[i].coordination[0]
-                y[i] = self.population[i].coordination[1]
+                # x[i] = self.population[i].coordination[0]
+                # y[i] = self.population[i].coordination[1]
+
 
             print(center.best)
             current_best[k] = center.best
@@ -132,16 +133,14 @@ class MyAlgo:
 if __name__=='__main__':
     t = time.time()
     functions = ['Ackley', 'Rastrigin', 'Sphere', 'Rosenbrock', 'Michalewitz']
-    # functions = ['Michalewitz']
+    threads = []
+    tasks = [MyAlgo(dim=30, testing=function) for function in functions]
+    for i in range(len(tasks)):
+        threads.append(mp.Process(target=tasks[i].run_algo))
+        threads[i].start()
 
-    # threads = []
-    # tasks = [MyAlgo(dim=30, testing=function) for function in functions]
-    # for i in range(len(tasks)):
-    #     threads.append(mp.Process(target=tasks[i].run_algo))
-    #     threads[i].start()
-
-    # for i in range(len(tasks)):
-    #     threads[i].join()
+    for i in range(len(tasks)):
+        threads[i].join()
 
     # for function in functions:
     #     algo = MyAlgo(dim=30, testing=function)
@@ -149,8 +148,8 @@ if __name__=='__main__':
     # algo.algo()
     # algo.run_algo()
 
-    algo = MyAlgo(dim=30, testing='Michalewitz')
-    algo.run_algo()
+    # algo = MyAlgo(dim=30, testing='Sphere')
+    # algo.run_algo()
 
     print(time.time() - t, 'sec')
     exit()
