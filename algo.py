@@ -94,18 +94,18 @@ class MyAlgo:
                 if self.population[i].best <= center.best:
                     center = self.population[i]
                     self.max_mov = self.max_mov * self.reward_factor
-                # x[i] = self.population[i].coordination[0]
-                # y[i] = self.population[i].coordination[1]
+                x[i] = self.population[i].coordination[0]
+                y[i] = self.population[i].coordination[1]
 
 
             print(center.best)
             current_best[k] = center.best
             self.max_mov = self.max_mov * self.discount_factor
 
-            # fig, ax = plt.subplots()
-            # plt.axis([self.lower_bound, self.upper_bound, self.lower_bound, self.upper_bound])
-            # plt.plot(x, y, 'o')
-            # plt.show()
+            fig, ax = plt.subplots()
+            plt.axis([self.lower_bound, self.upper_bound, self.lower_bound, self.upper_bound])
+            plt.plot(x, y, 'o')
+            plt.show()
 
         return current_best
 
@@ -132,15 +132,15 @@ class MyAlgo:
 
 if __name__=='__main__':
     t = time.time()
-    functions = ['Ackley', 'Rastrigin', 'Sphere', 'Rosenbrock', 'Michalewitz']
-    threads = []
-    tasks = [MyAlgo(dim=30, testing=function) for function in functions]
-    for i in range(len(tasks)):
-        threads.append(mp.Process(target=tasks[i].run_algo))
-        threads[i].start()
+    # functions = ['Ackley', 'Rastrigin', 'Sphere', 'Rosenbrock', 'Michalewitz']
+    # threads = []
+    # tasks = [MyAlgo(dim=30, testing=function) for function in functions]
+    # for i in range(len(tasks)):
+    #     threads.append(mp.Process(target=tasks[i].run_algo))
+    #     threads[i].start()
 
-    for i in range(len(tasks)):
-        threads[i].join()
+    # for i in range(len(tasks)):
+    #     threads[i].join()
 
     # for function in functions:
     #     algo = MyAlgo(dim=30, testing=function)
@@ -148,8 +148,8 @@ if __name__=='__main__':
     # algo.algo()
     # algo.run_algo()
 
-    # algo = MyAlgo(dim=30, testing='Sphere')
-    # algo.run_algo()
+    algo = MyAlgo(dim=30, testing='Sphere')
+    algo.run_algo()
 
     print(time.time() - t, 'sec')
     exit()
