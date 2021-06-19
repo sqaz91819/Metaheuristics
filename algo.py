@@ -180,7 +180,7 @@ class MyAlgo(Algo):
                 x[i] = self.population[i].coordination[0]
                 y[i] = self.population[i].coordination[1]
                 if current_evl < self.evaluation:
-                    current_best[current_evl] = center.best
+                    current_best[current_evl] = best_so_far
                 current_evl += 1
             if center.best < best_so_far:
                 best_so_far = center.best
