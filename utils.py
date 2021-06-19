@@ -91,3 +91,4 @@ if __name__=='__main__':
     # out = schwefel(1, [420.9687])
     # out = griewank(4, [0.0,0.0,0.0,0.0])
     # print(out)
+    exit()
