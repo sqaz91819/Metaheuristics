@@ -18,6 +18,8 @@ import multiprocessing as mp
 
 class Particle:
     def __init__(self, lower: float=0.0, upper: float=1.0, dim: int=2):
+        self.lower = lower
+        self.upper = upper
         self.dim = dim
         self.coordination = [random.uniform(lower, upper) for _ in range(self.dim)]
         self.best = 9999
@@ -28,18 +30,27 @@ class Particle:
 class PSO_Particle(Particle):
     def __init__(self, lower: float, upper: float, dim: int):
         super().__init__(lower=lower, upper=upper, dim=dim)
-        self.personal_v = [random.uniform(-10, 10) for _ in range(self.dim)]
-        self.personal_c = self.coordination # personal coordination
+        self.personal_v = [random.uniform(-5, 5) for _ in range(self.dim)]
+        self.personal_c = self.coordination.copy() # personal coordination
         self.current = self.best
 
     def init_particle(self, fitness):
         self.best = fitness
         self.current = self.best
 
+    def copy(self):
+        new_p = PSO_Particle(self.lower, self.upper, self.dim)
+        new_p.personal_c = self.personal_c.copy()
+        new_p.personal_v = self.personal_v.copy()
+        new_p.coordination = self.coordination.copy()
+        new_p.current = self.current
+        new_p.best = self.best
+
+
 
 class Algo:
     def __init__(self, dim: int=2, testing: str='Ackley'):
-        self.run = 30
+        self.run = 1
         self.dim = dim
         self.testing = testing
         self.lower_bound = DOMAIN[self.testing][0]
@@ -71,18 +82,18 @@ class PSO(Algo):
         best_p = Particles[0]
         while current_evl < self.evaluation:
             for p in Particles:
-                if p.current < best_p.current:
+                if p.best < best_p.best:
                     best_p = p
 
             for p in Particles:
                 for d in range(self.dim):
                     lo1 = random.random()
                     lo2 = random.random()
-                    p.personal_v[d] = 0.7 * p.personal_v[d] + lo1 * 1.496180 * (p.personal_c[d] - p.coordination[d]) + lo2 * 1.496180 * (best_p.coordination[d] - p.coordination[d])
-                    if p.personal_v[d] > 1.0:
-                        p.personal_v[d] = 1.0
-                    if p.personal_v[d] < -1.0:
-                        p.personal_v[d] = -1.0
+                    p.personal_v[d] = 0.7 * p.personal_v[d] + lo1 * 1.496180 * (p.personal_c[d] - p.coordination[d]) + lo2 * 1.496180 * (best_p.personal_c[d] - p.coordination[d])
+                    if p.personal_v[d] > 5.0:
+                        p.personal_v[d] = 5.0
+                    if p.personal_v[d] < -5.0:
+                        p.personal_v[d] = -5.0
 
                 for d in range(self.dim):
                     p.coordination[d] += p.personal_v[d]
@@ -95,17 +106,16 @@ class PSO(Algo):
 
                 if p.current < p.best:
                     p.best = p.current
-                    p.personal_c = p.coordination
+                    p.personal_c = p.coordination.copy()
 
-                if p.current < best_p.current:
+                if p.current < best_p.best:
                     best_p = p
 
                 current_evl += 1
-            print(best_p.current)
+            print(best_p.best)
 
 
     def my_run(self):
-        print('?')
         self.algo()
 
 # 1. Initialize the centra point, max movement distance, discount factor, reward factor
@@ -175,7 +185,7 @@ class MyAlgo(Algo):
                 if self.population[i].best <= center.best:
                     center = self.population[i]
                     self.max_mov = self.max_mov * self.reward_factor
-                    if random.random() < 0.5:
+                    if random.random() < 0.4:
                         self.popsize += 1
                 x[i] = self.population[i].coordination[0]
                 y[i] = self.population[i].coordination[1]
@@ -191,6 +201,8 @@ class MyAlgo(Algo):
             print(best_so_far)
             # print('size :', self.popsize)
             self.max_mov = self.max_mov * self.discount_factor
+            if self.max_mov > self.upper_bound - self.lower_bound:
+                self.max_mov = (self.upper_bound - self.lower_bound) * 0.7
             k = k + 1
 
             if self.popsize == 0:
@@ -232,7 +244,7 @@ class MyAlgo(Algo):
 
 if __name__=='__main__':
     t = time.time()
-    test = False
+    test = True
     if not test:
         functions = ['Ackley', 'Rastrigin', 'Sphere', 'Rosenbrock', 'Michalewitz', 'Griewank', 'Schwefel', 'Sum_squares', 'Zakharov', 'Powell']
         threads = []
@@ -252,8 +264,8 @@ if __name__=='__main__':
     # algo = MyAlgo(dim=30, testing='Schwefel')
     # algo.run_algo()
     else:
-        pso = PSO(dim=30, testing='Sphere')
-        pso.my_run()
+        pso = MyAlgo(dim=30, testing='Rosenbrock')
+        pso.run_algo()
 
     print(time.time() - t, 'sec')
     exit()
